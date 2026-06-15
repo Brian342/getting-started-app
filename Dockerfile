@@ -1,13 +1,17 @@
 # syntax=docker/dockerfile:1
 
-FROM node:24-alpine
+# Switching from alpine to slim (Debian-based)
+FROM node:24-slim
 WORKDIR /app
 
-# Install compilation tools required by sqlite3 / node-gyp
-RUN apk add --no-cache python3 make g++
+# Copy ONLY package files first to leverage caching
+COPY package.json ./
 
-COPY . .
+# Install dependencies (Debian binaries usually download fine without compilers)
 RUN npm install --omit=dev
+
+# Copy the rest of your application code
+COPY . .
 
 CMD ["node", "src/index.js"]
 EXPOSE 3000
